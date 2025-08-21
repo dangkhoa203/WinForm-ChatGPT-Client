@@ -1,7 +1,6 @@
 ﻿using Krypton.Toolkit;
-using OpenAI_API;
-using OpenAI_API.Chat;
-using OpenAI_API.Models;
+using OpenAI;
+using OpenAI.Chat;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -23,8 +22,7 @@ namespace WindowsFormsApp1
     {
         int running = 0;
         public History History;
-        public OpenAIAPI openAiApi;
-        public Conversation chat;
+        public ChatClient openAiApi;
         public HistoryPage historypage;
         public ChatPage()
         {
@@ -34,9 +32,9 @@ namespace WindowsFormsApp1
         {
             try
             {
-                chat = openAiApi.Chat.CreateConversation();
-                chat.Model = Model.ChatGPTTurbo;
-                chat.RequestParameters.Temperature = 1;
+                //chat = openAiApi.Chat.CreateConversation();
+                //chat.Model = Model.ChatGPTTurbo;
+                //chat.RequestParameters.Temperature = 1;
             }
             catch (Exception e)
             {
@@ -64,15 +62,16 @@ namespace WindowsFormsApp1
                 ChatboxAppend($"\n\n({Temp.TimeOfChat}) User: {input}", Color.White);
 
                 progressBar1.Value = 40;
-                chat.AppendUserInput(input);
+                ChatCompletion completion =await openAiApi.CompleteChatAsync(input);
+
                 chatbox.SelectionStart = chatbox.Text.Length;
                 chatbox.ScrollToCaret();
                 chatinput.Clear();
 
                 progressBar1.Value = 80;
-                var response = await chat.GetResponseFromChatbotAsync();
+                
                 Temp.TimeOfMessage = DateTime.Now;
-                ChatboxAppend($"\n\n({ Temp.TimeOfMessage}) Bot: {response}", Color.Green);
+                ChatboxAppend($"\n\n({ Temp.TimeOfMessage}) Bot: {completion.Content[0].Text}", Color.Green);
                 B_enterinput.Enabled = true;
                 running = 0;
                 chatbox.SelectionStart = chatbox.Text.Length;
@@ -81,7 +80,7 @@ namespace WindowsFormsApp1
 
                 progressBar1.Value = 100;
                 Temp.Prompt = input;
-                Temp.Message = response;
+                Temp.Message = completion.Content[0].Text;
                 History.Add(Temp);
                 DataAccess.SaveFile("data.txt", History.getHistory());
                 historypage.updatecombobox(History.getHistory().Keys.ToList());

@@ -1,4 +1,5 @@
-﻿using OpenAI_API;
+﻿using OpenAI;
+using OpenAI.Chat;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -28,21 +29,23 @@ namespace WindowsFormsApp1
         {
             try
             {
+               
                 running++;
                 Enter.Enabled = false;
-                APIAuthentication aPIAuthentication = new APIAuthentication(apikey.Text);
-                bool result = await aPIAuthentication.ValidateAPIKey();
-                if (result)
-                {
+                OpenAIClient client = new OpenAIClient(apikey.Text);
+                ChatClient chatClient = client.GetChatClient("gpt-4");
+                try {
+                    ChatCompletion completion = await chatClient.CompleteChatAsync("Say 'hello'.");
                     this.Hide();
                     MainPage access = new MainPage(apikey.Text);
                     access.EnterPage = this;
                     access.ShowDialog();
                 }
-                else
-                {
-                    MessageBox.Show($"{apikey.Text} can't be use!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                catch {
+                     MessageBox.Show($"Your API key can't be use!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+                
+               
             }
             finally {
                 running--;

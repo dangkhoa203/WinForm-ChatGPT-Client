@@ -1,4 +1,5 @@
-﻿using OpenAI_API;
+﻿using OpenAI.Chat;
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,14 +17,15 @@ namespace WindowsFormsApp1
 {
     public partial class MainPage : Form
     {
-        private OpenAIAPI openAiApi;
+        private ChatClient openAiApi;
         private readonly History History=new History();
         public Main EnterPage;
         public MainPage(string apikey)
         {
             InitializeComponent();
             label1.Text = DateTime.Now.ToString("dd/MM/yyyy");
-            openAiApi = new OpenAIAPI(apikey);
+            ChatClient client = 
+            openAiApi = new ChatClient(model: "gpt-4o", apiKey: apikey);
             chatPage1.History = this.History;
             chatPage1.openAiApi = this.openAiApi;
             chatPage1.Createchat();
